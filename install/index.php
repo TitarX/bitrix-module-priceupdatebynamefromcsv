@@ -42,12 +42,13 @@ class perfcode_priceupdate extends CModule
     {
         global $APPLICATION;
 
-        // Действия при установке модуля
+        $documentRoot = Application::getDocumentRoot();
+        $this->copyFiles($documentRoot);
 
         $this->RegisterEvents();
         $this->InstallDB();
 
-        RegisterModule($this->MODULE_ID);
+        ModuleManager::registerModule($this->MODULE_ID);
 
         $APPLICATION->IncludeAdminFile(Loc::getMessage('PERFCODE_PRICEUPDATE_MODULE_INSTALL'), __DIR__ . '/step.php');
     }
@@ -56,12 +57,12 @@ class perfcode_priceupdate extends CModule
     {
         global $APPLICATION;
 
-        // Действия при удалении модуля
+        $this->deleteFiles();
 
         $this->UnRegisterEvents();
         $this->UnInstallDB();
 
-        UnRegisterModule($this->MODULE_ID);
+        ModuleManager::unRegisterModule($this->MODULE_ID);
 
         $APPLICATION->IncludeAdminFile(Loc::getMessage('PERFCODE_PRICEUPDATE_MODULE_UNINSTALL'), __DIR__ . '/unstep.php');
     }
@@ -84,12 +85,22 @@ class perfcode_priceupdate extends CModule
 
     function InstallDB()
     {
-        //
+        return true;
     }
 
     function UnInstallDB()
     {
-        //
+        return true;
+    }
+
+    private function copyFiles($documentRoot)
+    {
+        CopyDirFiles(__DIR__ . '/pages/admin/perfcode_priceupdate_update.php', "{$documentRoot}/bitrix/admin/perfcode_priceupdate_update.php", true, true, false);
+    }
+
+    private function deleteFiles()
+    {
+        DeleteDirFilesEx('/bitrix/admin/perfcode_priceupdate_update.php');
     }
 
     function RegisterEvents()

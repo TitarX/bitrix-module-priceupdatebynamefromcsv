@@ -17,7 +17,7 @@ $arAdminMenu = array(
        array(
            'text' => Loc::getMessage('PERFCODE_PRICEUPDATE_SUBMENU_TEXT'),
            'title' => Loc::getMessage('PERFCODE_PRICEUPDATE_SUBMENU_TITLE'),
-           'url' => 'perfcode_priceupdate_action.php?lang=' . LANGUAGE_ID,
+           'url' => 'perfcode_priceupdate_update.php?lang=' . LANGUAGE_ID,
            'icon' => ''
        )
    )
