@@ -5,7 +5,7 @@ use Bitrix\Main\Localization\Loc;
 Loc::loadMessages(__FILE__);
 
 $arAdminMenu = array(
-   'parent_menu' => 'global_menu_services',
+   'parent_menu' => 'global_menu_store',
    'sort' => 1000,
    'text' => Loc::getMessage('PERFCODE_PRICEUPDATE_MENU_TEXT'),
    'title' => Loc::getMessage('PERFCODE_PRICEUPDATE_MENU_TITLE'),

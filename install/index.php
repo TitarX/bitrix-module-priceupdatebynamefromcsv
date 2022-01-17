@@ -4,6 +4,8 @@ use Bitrix\Main\Application;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\EventManager;
 use Bitrix\Main\ModuleManager;
+use Bitrix\Main\Config\Option;
+use Bitrix\Main\IO\Directory;
 
 Loc::loadMessages(__FILE__);
 
@@ -41,14 +43,27 @@ class perfcode_priceupdate extends CModule
     function DoInstall()
     {
         global $APPLICATION;
+        global $errors;
 
-        $documentRoot = Application::getDocumentRoot();
-        $this->copyFiles($documentRoot);
+        $errors = '';
+        if (!ModuleManager::isModuleInstalled('iblock')) {
+            $errors = Loc::getMessage('PERFCODE_PRICEUPDATE_MODULE_NOT_INSTALLED_IBLOCK');
+        } elseif (!ModuleManager::isModuleInstalled('sale')) {
+            $errors = Loc::getMessage('PERFCODE_PRICEUPDATE_MODULE_NOT_INSTALLED_SALE');
+        } elseif (!ModuleManager::isModuleInstalled('catalog')) {
+            $errors = Loc::getMessage('PERFCODE_PRICEUPDATE_MODULE_NOT_INSTALLED_CATALOG');
+        } elseif (!ModuleManager::isModuleInstalled('currency')) {
+            $errors = Loc::getMessage('PERFCODE_PRICEUPDATE_MODULE_NOT_INSTALLED_CURRENCY');
+        } else {
+            $documentRoot = Application::getDocumentRoot();
+            $this->copyFiles($documentRoot);
+            $this->createDirectories($documentRoot);
 
-        $this->RegisterEvents();
-        $this->InstallDB();
+            $this->RegisterEvents();
+            $this->InstallDB();
 
-        ModuleManager::registerModule($this->MODULE_ID);
+            ModuleManager::registerModule($this->MODULE_ID);
+        }
 
         $APPLICATION->IncludeAdminFile(Loc::getMessage('PERFCODE_PRICEUPDATE_MODULE_INSTALL'), __DIR__ . '/step.php');
     }
@@ -56,8 +71,12 @@ class perfcode_priceupdate extends CModule
     function DoUninstall()
     {
         global $APPLICATION;
+        global $errors;
+
+        $errors = '';
 
         $this->deleteFiles();
+        $this->deleteDirectories();
 
         $this->UnRegisterEvents();
         $this->UnInstallDB();
@@ -85,11 +104,33 @@ class perfcode_priceupdate extends CModule
 
     function InstallDB()
     {
+        global $APPLICATION;
+        global $DB;
+        global $errors;
+
+        $documentRoot = Application::getDocumentRoot();
+        $errors = $DB->RunSQLBatch("{$documentRoot}/bitrix/modules/perfcode.priceupdate/install/db/" . strtolower($DB->type) . '/install.sql');
+        if (!empty($errors)) {
+            $APPLICATION->ThrowException(implode('. ', $errors));
+            return false;
+        }
+
         return true;
     }
 
     function UnInstallDB()
     {
+        global $APPLICATION;
+        global $DB;
+        global $errors;
+
+        $documentRoot = Application::getDocumentRoot();
+        $errors = $DB->RunSQLBatch("{$documentRoot}/bitrix/modules/perfcode.priceupdate/install/db/" . strtolower($DB->type) . '/uninstall.sql');
+        if (!empty($errors)) {
+            $APPLICATION->ThrowException(implode('. ', $errors));
+            return false;
+        }
+
         return true;
     }
 
@@ -101,6 +142,27 @@ class perfcode_priceupdate extends CModule
     private function deleteFiles()
     {
         DeleteDirFilesEx('/bitrix/admin/perfcode_priceupdate_update.php');
+    }
+
+    private function createDirectories($documentRoot)
+    {
+        $uploadDirectoryName = Option::get('main', 'upload_dir');
+
+        $perfcodeDirectoryPath = "{$documentRoot}/{$uploadDirectoryName}/perfcode";
+        if (!Directory::isDirectoryExists($perfcodeDirectoryPath)) {
+            Directory::createDirectory($perfcodeDirectoryPath);
+        }
+
+        $priceupdateDirectoryPath = "{$perfcodeDirectoryPath}/priceupdate";
+        if (!Directory::isDirectoryExists($priceupdateDirectoryPath)) {
+            Directory::createDirectory($priceupdateDirectoryPath);
+        }
+    }
+
+    private function deleteDirectories()
+    {
+        $uploadDirectoryPath = Option::get('main', 'upload_dir');
+        DeleteDirFilesEx("/{$uploadDirectoryPath}/perfcode/priceupdate");
     }
 
     function RegisterEvents()
