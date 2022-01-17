@@ -1,10 +1,10 @@
 <?php
 
-namespace Perfcode\PriceUpdate\Events;
+namespace Perfcode\PriceUpdateByNameFromCsv\Events;
 
 use \Bitrix\Main\Loader;
 
-Loader::includeModule('perfcode.priceupdate');
+Loader::includeModule('perfcode.priceupdatebynamefromcsv');
 
 class MainEvents
 {

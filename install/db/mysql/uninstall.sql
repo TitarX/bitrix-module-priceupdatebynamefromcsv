@@ -1,1 +1,1 @@
-drop table if exists perfcode_priceupdate_params;
+drop table if exists perfcode_priceupdatebynamefromcsv_params;

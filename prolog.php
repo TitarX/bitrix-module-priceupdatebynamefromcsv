@@ -1,3 +1,3 @@
 <?php
 
-define('ADMIN_MODULE_NAME', 'perfcode.priceupdate');
+define('ADMIN_MODULE_NAME', 'perfcode.priceupdatebynamefromcsv');

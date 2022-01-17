@@ -1,6 +1,6 @@
 <?php
 
-namespace Perfcode\PriceUpdate\Helpers;
+namespace Perfcode\PriceUpdateByNameFromCsv\Helpers;
 
 class MiscHelper
 {

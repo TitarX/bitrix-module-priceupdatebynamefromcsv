@@ -11,13 +11,13 @@ Loc::loadMessages(__FILE__);
 global $APPLICATION;
 
 if (empty($errors)) {
-    CAdminMessage::ShowNote(Loc::getMessage('PERFCODE_PRICEUPDATE_MODULE_INSTALLED_SUCCESS'));
+    CAdminMessage::ShowNote(Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_MODULE_INSTALLED_SUCCESS'));
 } else {
-    CAdminMessage::ShowMessage(array('TYPE' => 'ERROR', 'MESSAGE' => Loc::getMessage('PERFCODE_PRICEUPDATE_MODULE_INSTALLED_FAIL'), 'DETAILS' => $errors, 'HTML' => true));
+    CAdminMessage::ShowMessage(array('TYPE' => 'ERROR', 'MESSAGE' => Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_MODULE_INSTALLED_FAIL'), 'DETAILS' => $errors, 'HTML' => true));
 }
 ?>
 
 <form method="post" action="<?= $APPLICATION->GetCurPage() ?>">
     <input type="hidden" name="lang" value="<?= LANGUAGE_ID ?>">
-    <input type="submit" name="sbutton" value="<?= Loc::getMessage('PERFCODE_PRICEUPDATE_BACK_TO_LIST') ?>">
+    <input type="submit" name="sbutton" value="<?= Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_BACK_TO_LIST') ?>">
 </form>

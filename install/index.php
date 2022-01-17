@@ -9,15 +9,15 @@ use Bitrix\Main\IO\Directory;
 
 Loc::loadMessages(__FILE__);
 
-class perfcode_priceupdate extends CModule
+class perfcode_priceupdatebynamefromcsv extends CModule
 {
     var $exclusionAdminFiles;
 
     function __construct()
     {
-        $this->MODULE_ID = 'perfcode.priceupdate';
-        $this->MODULE_NAME = Loc::getMessage('PERFCODE_PRICEUPDATE_MODULE_NAME');
-        $this->MODULE_DESCRIPTION = Loc::getMessage('PERFCODE_PRICEUPDATE_MODULE_DESCRIPTION');
+        $this->MODULE_ID = 'perfcode.priceupdatebynamefromcsv';
+        $this->MODULE_NAME = Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_MODULE_NAME');
+        $this->MODULE_DESCRIPTION = Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_MODULE_DESCRIPTION');
 
         $this->PARTNER_NAME = '';
         $this->PARTNER_URI = '';
@@ -47,13 +47,13 @@ class perfcode_priceupdate extends CModule
 
         $errors = '';
         if (!ModuleManager::isModuleInstalled('iblock')) {
-            $errors = Loc::getMessage('PERFCODE_PRICEUPDATE_MODULE_NOT_INSTALLED_IBLOCK');
+            $errors = Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_MODULE_NOT_INSTALLED_IBLOCK');
         } elseif (!ModuleManager::isModuleInstalled('sale')) {
-            $errors = Loc::getMessage('PERFCODE_PRICEUPDATE_MODULE_NOT_INSTALLED_SALE');
+            $errors = Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_MODULE_NOT_INSTALLED_SALE');
         } elseif (!ModuleManager::isModuleInstalled('catalog')) {
-            $errors = Loc::getMessage('PERFCODE_PRICEUPDATE_MODULE_NOT_INSTALLED_CATALOG');
+            $errors = Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_MODULE_NOT_INSTALLED_CATALOG');
         } elseif (!ModuleManager::isModuleInstalled('currency')) {
-            $errors = Loc::getMessage('PERFCODE_PRICEUPDATE_MODULE_NOT_INSTALLED_CURRENCY');
+            $errors = Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_MODULE_NOT_INSTALLED_CURRENCY');
         } else {
             $documentRoot = Application::getDocumentRoot();
             $this->copyFiles($documentRoot);
@@ -65,7 +65,7 @@ class perfcode_priceupdate extends CModule
             ModuleManager::registerModule($this->MODULE_ID);
         }
 
-        $APPLICATION->IncludeAdminFile(Loc::getMessage('PERFCODE_PRICEUPDATE_MODULE_INSTALL'), __DIR__ . '/step.php');
+        $APPLICATION->IncludeAdminFile(Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_MODULE_INSTALL'), __DIR__ . '/step.php');
     }
 
     function DoUninstall()
@@ -83,7 +83,7 @@ class perfcode_priceupdate extends CModule
 
         ModuleManager::unRegisterModule($this->MODULE_ID);
 
-        $APPLICATION->IncludeAdminFile(Loc::getMessage('PERFCODE_PRICEUPDATE_MODULE_UNINSTALL'), __DIR__ . '/unstep.php');
+        $APPLICATION->IncludeAdminFile(Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_MODULE_UNINSTALL'), __DIR__ . '/unstep.php');
     }
 
     //Определяем место размещения модуля
@@ -109,7 +109,7 @@ class perfcode_priceupdate extends CModule
         global $errors;
 
         $documentRoot = Application::getDocumentRoot();
-        $errors = $DB->RunSQLBatch("{$documentRoot}/bitrix/modules/perfcode.priceupdate/install/db/" . strtolower($DB->type) . '/install.sql');
+        $errors = $DB->RunSQLBatch("{$documentRoot}/bitrix/modules/perfcode.priceupdatebynamefromcsv/install/db/" . strtolower($DB->type) . '/install.sql');
         if (!empty($errors)) {
             $APPLICATION->ThrowException(implode('. ', $errors));
             return false;
@@ -125,7 +125,7 @@ class perfcode_priceupdate extends CModule
         global $errors;
 
         $documentRoot = Application::getDocumentRoot();
-        $errors = $DB->RunSQLBatch("{$documentRoot}/bitrix/modules/perfcode.priceupdate/install/db/" . strtolower($DB->type) . '/uninstall.sql');
+        $errors = $DB->RunSQLBatch("{$documentRoot}/bitrix/modules/perfcode.priceupdatebynamefromcsv/install/db/" . strtolower($DB->type) . '/uninstall.sql');
         if (!empty($errors)) {
             $APPLICATION->ThrowException(implode('. ', $errors));
             return false;
@@ -136,12 +136,12 @@ class perfcode_priceupdate extends CModule
 
     private function copyFiles($documentRoot)
     {
-        CopyDirFiles(__DIR__ . '/pages/admin/perfcode_priceupdate_update.php', "{$documentRoot}/bitrix/admin/perfcode_priceupdate_update.php", true, true, false);
+        CopyDirFiles(__DIR__ . '/pages/admin/perfcode_priceupdatebynamefromcsv_update.php', "{$documentRoot}/bitrix/admin/perfcode_priceupdatebynamefromcsv_update.php", true, true, false);
     }
 
     private function deleteFiles()
     {
-        DeleteDirFilesEx('/bitrix/admin/perfcode_priceupdate_update.php');
+        DeleteDirFilesEx('/bitrix/admin/perfcode_priceupdatebynamefromcsv_update.php');
     }
 
     private function createDirectories($documentRoot)
@@ -153,16 +153,16 @@ class perfcode_priceupdate extends CModule
             Directory::createDirectory($perfcodeDirectoryPath);
         }
 
-        $priceupdateDirectoryPath = "{$perfcodeDirectoryPath}/priceupdate";
-        if (!Directory::isDirectoryExists($priceupdateDirectoryPath)) {
-            Directory::createDirectory($priceupdateDirectoryPath);
+        $priceupdatebynamefromcsvDirectoryPath = "{$perfcodeDirectoryPath}/priceupdatebynamefromcsv";
+        if (!Directory::isDirectoryExists($priceupdatebynamefromcsvDirectoryPath)) {
+            Directory::createDirectory($priceupdatebynamefromcsvDirectoryPath);
         }
     }
 
     private function deleteDirectories()
     {
         $uploadDirectoryPath = Option::get('main', 'upload_dir');
-        DeleteDirFilesEx("/{$uploadDirectoryPath}/perfcode/priceupdate");
+        DeleteDirFilesEx("/{$uploadDirectoryPath}/perfcode/priceupdatebynamefromcsv");
     }
 
     function RegisterEvents()
@@ -193,7 +193,7 @@ class perfcode_priceupdate extends CModule
         return array(
             "reference_id" => array('D'),
             "reference" => array(
-                '[D] ' . Loc::getMessage('PERFCODE_PRICEUPDATE_RIGHT_DENIED')
+                '[D] ' . Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_RIGHT_DENIED')
             )
         );
     }

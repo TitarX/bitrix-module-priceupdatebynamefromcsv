@@ -1,1 +1,1 @@
-# bitrix-module-priceupdate
+# bitrix-module-priceupdatebynamefromcsv
