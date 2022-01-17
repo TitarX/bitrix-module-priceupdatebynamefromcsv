@@ -137,11 +137,19 @@ class perfcode_priceupdatebynamefromcsv extends CModule
     private function copyFiles($documentRoot)
     {
         CopyDirFiles(__DIR__ . '/pages/admin/perfcode_priceupdatebynamefromcsv_update.php', "{$documentRoot}/bitrix/admin/perfcode_priceupdatebynamefromcsv_update.php", true, true, false);
+
+        CopyDirFiles(__DIR__ . '/js', "{$documentRoot}/bitrix/js/{$this->MODULE_ID}", true, true, false);
+        CopyDirFiles(__DIR__ . '/css', "{$documentRoot}/bitrix/css/{$this->MODULE_ID}", true, true, false);
+        CopyDirFiles(__DIR__ . '/images', "{$documentRoot}/bitrix/images/{$this->MODULE_ID}", true, true, false);
     }
 
     private function deleteFiles()
     {
         DeleteDirFilesEx('/bitrix/admin/perfcode_priceupdatebynamefromcsv_update.php');
+
+        DeleteDirFilesEx("/bitrix/js/{$this->MODULE_ID}");
+        DeleteDirFilesEx("/bitrix/css/{$this->MODULE_ID}");
+        DeleteDirFilesEx("/bitrix/images/{$this->MODULE_ID}");
     }
 
     private function createDirectories($documentRoot)
