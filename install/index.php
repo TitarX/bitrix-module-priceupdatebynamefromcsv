@@ -171,7 +171,7 @@ class perfcode_priceupdatebynamefromcsv extends CModule
             'main',
             'OnEpilog',
             $this->MODULE_ID,
-            'Perfcode\PriceUpdate\Events\MainEvents',
+            'Perfcode\PriceUpdateByNameFromCsv\Events\MainEvents',
             'EpilogHandler',
             1000
         );
@@ -183,7 +183,7 @@ class perfcode_priceupdatebynamefromcsv extends CModule
             'main',
             'OnEpilog',
             $this->MODULE_ID,
-            'Perfcode\PriceUpdate\Events\MainEvents',
+            'Perfcode\PriceUpdateByNameFromCsv\Events\MainEvents',
             'EpilogHandler'
         );
     }
