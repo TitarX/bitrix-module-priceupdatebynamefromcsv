@@ -11,7 +11,7 @@ Loader::includeModule('perfcode.priceupdatebynamefromcsv');
 @set_time_limit(360);
 
 global $APPLICATION;
-$APPLICATION->SetTitle(Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_TITLE'));
+$APPLICATION->SetTitle(Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_PAGE_TITLE'));
 
 Asset::getInstance()->addJs(MiscHelper::getAssetsPath('js') . '/perfcode_priceupdatebynamefromcsv_update.js');
 
@@ -32,5 +32,5 @@ CAdminFileDialog::ShowScript(
 );
 ?>
 
-<input type="text" name="selected_file_path" id="selected_file_path">
+<input type="text" name="selected_file_path" id="selected_file_path" size="64" placeholder="<?= Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_FILEPATH_PLACEHOLDER_TITLE') ?>" readonly>
 <button id='open_file_dialog_button'>Открыть</button>
