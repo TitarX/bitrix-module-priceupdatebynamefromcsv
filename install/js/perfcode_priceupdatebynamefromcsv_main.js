@@ -1,10 +1,15 @@
 'use strict';
 
+function scrollToElement(elementId) {
+    let infoElement = document.getElementById(elementId);
+    window.scrollTo(infoElement.offsetLeft, infoElement.offsetTop);
+}
+
 function showMessage(url, type, text, args, elementId) {
     let ajaxResponse = BX.ajax({
         url: url,
         data: {
-            mode: "message",
+            action: "message",
             type: type,
             text: text,
             args: args
