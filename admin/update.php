@@ -156,5 +156,5 @@ if (!empty($rsParamsCount)) {
 <br>
 
 <button id="start-update-button">
-    <?= Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_FILE_STAT_BUTTON') ?>
+    <?= Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_FILE_START_BUTTON') ?>
 </button>
