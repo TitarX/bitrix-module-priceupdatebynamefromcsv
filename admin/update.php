@@ -102,26 +102,63 @@ if ($request->isPost()) {
     } elseif ($request->get('action') === 'update') { // Обновление
         $APPLICATION->RestartBuffer();
 
-        $result = array();
+        $result = array('result' => 'success');
+
+        $errorText = '';
+        $errorArgs = array();
 
         $phpInput = file_get_contents('php://input');
         $phpInput = json_decode($phpInput, true);
 
-        $documentRoot = Application::getDocumentRoot();
-        $csvFilePath = "{$documentRoot}{$phpInput['filepath']}";
+        if (empty($phpInput['productname'])) {
+            $errorText = 'PERFCODE_PRICEUPDATEBYNAMEFROMCSV_ERROR_TEXT';
+            $errorArgs = array('#PARAM_NAME#' => Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_PRODUCT_NAME_LABEL'));
+        } elseif (empty($phpInput['price'])) {
+            $errorText = 'PERFCODE_PRICEUPDATEBYNAMEFROMCSV_ERROR_TEXT';
+            $errorArgs = array('#PARAM_NAME#' => Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_PRICE_LABEL'));
+        } elseif (empty($phpInput['currency'])) {
+            $errorText = 'PERFCODE_PRICEUPDATEBYNAMEFROMCSV_ERROR_TEXT';
+            $errorArgs = array('#PARAM_NAME#' => Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_CURRENCY_LABEL'));
+        } elseif (empty($phpInput['iblock'])) {
+            $errorText = 'PERFCODE_PRICEUPDATEBYNAMEFROMCSV_ERROR_TEXT';
+            $errorArgs = array('#PARAM_NAME#' => Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_IBLOCK_LABEL'));
+        } elseif (empty($phpInput['manufacturer'])) {
+            $errorText = 'PERFCODE_PRICEUPDATEBYNAMEFROMCSV_ERROR_TEXT';
+            $errorArgs = array('#PARAM_NAME#' => Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_MANUFACTURER_LABEL'));
+        }
 
-        $isDoConvertEncoding = false;
-        if (($handle = fopen($csvFilePath, 'r')) !== false) {
-            if (($data = fgetcsv($handle, 0, ';')) !== false) {
-                if (!empty($data[0])) {
-                    if (mb_check_encoding($data[0], 'UTF-8')) {
-                        $data = mb_convert_encoding($data, 'UTF-8', 'WINDOWS-1251');
-                        $isDoConvertEncoding = true;
+        if (empty($errorText)) {
+            $documentRoot = Application::getDocumentRoot();
+            $csvFilePath = "{$documentRoot}{$phpInput['filepath']}";
+
+            $isDoConvertEncoding = false;
+            $isFirstRow = true;
+            $productNameIndex = -1;
+            $priceIndex = -1;
+            $currencyIndex = -1;
+            if (($handle = fopen($csvFilePath, 'r')) !== false) {
+                while (($data = fgetcsv($handle, 0, ';')) !== false) {
+                    if ($isFirstRow) { // Первая строка
+                        if (!mb_check_encoding($data, 'UTF-8')) {
+                            $data = mb_convert_encoding($data, 'UTF-8', 'WINDOWS-1251');
+                            $isDoConvertEncoding = true;
+                        }
+
+//                        if (array_search()) {
+//                            //
+//                        }
+
+                        $isFirstRow = false;
+                    } else {
+                        //
                     }
-//                    file_put_contents(__DIR__ . '/temp.txt', print_r($data, true));
                 }
+                fclose($handle);
             }
-            fclose($handle);
+        } else {
+            $result['result'] = 'fail';
+            $result['error'] = $errorText;
+            $result['errorargs'] = $errorArgs;
         }
 
         print json_encode($result);
@@ -134,10 +171,13 @@ if ($request->isPost()) {
         $messageText = $request->getPost('text');
         $messageArgs = $request->getPost('args');
         if (!is_array($messageArgs)) {
-            $messageArgs = array();
+            $messageArgs = json_decode($messageArgs, true);
+            if (empty($messageArgs)) {
+                $messageArgs = array();
+            }
         }
 
-        $message = vsprintf(Loc::getMessage($messageText), $messageArgs);
+        $message = Loc::getMessage($messageText, $messageArgs);
         \CAdminMessage::ShowMessage(array('MESSAGE' => $message, 'TYPE' => $messageType));
 
         exit();
@@ -189,29 +229,31 @@ if (!empty($rsParamsCount)) {
 
 <fieldset>
     <legend><?= Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_FILE_FIELDSET_LEGEND') ?></legend>
+    <div><strong><?= Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_CSV_INFO_LABEL') ?></strong></div>
+    <br>
     <div>
-        <label for="selected_file_path"><?= Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_FILEPATH_LABEL') ?></label>
+        <label for="selected_file_path"><?= Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_FILEPATH_LABEL') ?>:</label>
         <br>
         <input type="text" name="selected_file_path" id="selected_file_path" value="<?= $filePath ?>" size="64" readonly required>
         <button id='open_file_dialog_button'>Открыть</button>
     </div>
     <br>
     <div>
-        <label for="product-name-csv"><?= Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_PRODUCT_NAME_LABEL') ?></label>
+        <label for="product-name-csv"><?= Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_PRODUCT_NAME_LABEL') ?>:</label>
         <br>
-        <input type="text" name="product-name-csv" id="product-name-csv" value="<?= $productNameCsv ?>">
+        <input type="text" name="product-name-csv" id="product-name-csv" value="<?= $productNameCsv ?>" required>
     </div>
     <br>
     <div>
-        <label for="price-csv"><?= Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_PRICE_LABEL') ?></label>
+        <label for="price-csv"><?= Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_PRICE_LABEL') ?>:</label>
         <br>
-        <input type="text" name="price-csv" id="price-csv" value="<?= $priceCsv ?>">
+        <input type="text" name="price-csv" id="price-csv" value="<?= $priceCsv ?>" required>
     </div>
     <br>
     <div>
-        <label for="currency-csv"><?= Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_CURRENCY_LABEL') ?></label>
+        <label for="currency-csv"><?= Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_CURRENCY_LABEL') ?>:</label>
         <br>
-        <input type="text" name="currency-csv" id="currency-csv" value="<?= $currencyCsv ?>">
+        <input type="text" name="currency-csv" id="currency-csv" value="<?= $currencyCsv ?>" required>
     </div>
 </fieldset>
 
@@ -220,15 +262,15 @@ if (!empty($rsParamsCount)) {
 <fieldset>
     <legend><?= Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_CATALOG_FIELDSET_LEGEND') ?></legend>
     <div>
-        <label for="iblock-id"><?= Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_IBLOCK_LABEL') ?></label>
+        <label for="iblock-id"><?= Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_IBLOCK_LABEL') ?>:</label>
         <br>
-        <input type="number" name="iblock-id" id="iblock-id" value="<?= $iBlock ?>">
+        <input type="number" name="iblock-id" id="iblock-id" value="<?= $iBlock ?>" required>
     </div>
     <br>
     <div>
-        <label for="manufacturer-property"><?= Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_MANUFACTURER_LABEL') ?></label>
+        <label for="manufacturer-property"><?= Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_MANUFACTURER_LABEL') ?>:</label>
         <br>
-        <input type="text" name="manufacturer-property" id="manufacturer-property" value="<?= $manufacturer ?>">
+        <input type="text" name="manufacturer-property" id="manufacturer-property" value="<?= $manufacturer ?>" required>
     </div>
 </fieldset>
 
