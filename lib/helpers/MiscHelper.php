@@ -4,12 +4,12 @@ namespace Perfcode\PriceUpdateByNameFromCsv\Helpers;
 
 class MiscHelper
 {
-    public static function getModuleId()
+    public static function getModuleId(): string
     {
         return 'perfcode.priceupdatebynamefromcsv';
     }
 
-    public static function getAssetsPath($type)
+    public static function getAssetsPath(string $type): string
     {
         $moduleId = self::getModuleId();
         $assetsPath = '';
@@ -32,11 +32,9 @@ class MiscHelper
         }
         return $assetsPath;
     }
-    
-    public static function getProgressBar($total, $value, $message)
+
+    public static function getProgressBar(int $total, int $value, string $message): void
     {
-        $total = intval($total);
-        $value = intval($value);
         $total1 = $total / 100;
         $progressValue = 100;
         if ($total1 > 0) {
@@ -54,5 +52,21 @@ class MiscHelper
                 'PROGRESS_VALUE' => $progressValue
             )
         );
+    }
+
+    public static function getArrayIndexByValueOrSerialNumber(array $arData, string $val): ?int
+    {
+        $result = null;
+
+        $ind = array_search($val, $arData);
+        if ($ind === false) {
+            if (is_numeric($val) && isset($arData[$val])) {
+                $result = intval($val);
+            }
+        } else {
+            $result = intval($ind);
+        }
+
+        return $result;
     }
 }

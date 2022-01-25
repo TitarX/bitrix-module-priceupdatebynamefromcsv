@@ -111,19 +111,19 @@ if ($request->isPost()) {
         $phpInput = json_decode($phpInput, true);
 
         if (empty($phpInput['productname'])) {
-            $errorText = 'PERFCODE_PRICEUPDATEBYNAMEFROMCSV_ERROR_TEXT';
+            $errorText = 'PERFCODE_PRICEUPDATEBYNAMEFROMCSV_ERROR_PARAM_EMPTY_TEXT';
             $errorArgs = array('#PARAM_NAME#' => Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_PRODUCT_NAME_LABEL'));
         } elseif (empty($phpInput['price'])) {
-            $errorText = 'PERFCODE_PRICEUPDATEBYNAMEFROMCSV_ERROR_TEXT';
+            $errorText = 'PERFCODE_PRICEUPDATEBYNAMEFROMCSV_ERROR_PARAM_EMPTY_TEXT';
             $errorArgs = array('#PARAM_NAME#' => Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_PRICE_LABEL'));
         } elseif (empty($phpInput['currency'])) {
-            $errorText = 'PERFCODE_PRICEUPDATEBYNAMEFROMCSV_ERROR_TEXT';
+            $errorText = 'PERFCODE_PRICEUPDATEBYNAMEFROMCSV_ERROR_PARAM_EMPTY_TEXT';
             $errorArgs = array('#PARAM_NAME#' => Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_CURRENCY_LABEL'));
         } elseif (empty($phpInput['iblock'])) {
-            $errorText = 'PERFCODE_PRICEUPDATEBYNAMEFROMCSV_ERROR_TEXT';
+            $errorText = 'PERFCODE_PRICEUPDATEBYNAMEFROMCSV_ERROR_PARAM_EMPTY_TEXT';
             $errorArgs = array('#PARAM_NAME#' => Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_IBLOCK_LABEL'));
         } elseif (empty($phpInput['manufacturer'])) {
-            $errorText = 'PERFCODE_PRICEUPDATEBYNAMEFROMCSV_ERROR_TEXT';
+            $errorText = 'PERFCODE_PRICEUPDATEBYNAMEFROMCSV_ERROR_PARAM_EMPTY_TEXT';
             $errorArgs = array('#PARAM_NAME#' => Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_MANUFACTURER_LABEL'));
         }
 
@@ -137,25 +137,44 @@ if ($request->isPost()) {
             $priceIndex = -1;
             $currencyIndex = -1;
             if (($handle = fopen($csvFilePath, 'r')) !== false) {
-                while (($data = fgetcsv($handle, 0, ';')) !== false) {
+                while (($data = fgetcsv($handle, 0, ';')) !== false && empty($errorText)) {
                     if ($isFirstRow) { // Первая строка
                         if (!mb_check_encoding($data, 'UTF-8')) {
                             $data = mb_convert_encoding($data, 'UTF-8', 'WINDOWS-1251');
                             $isDoConvertEncoding = true;
                         }
 
-//                        if (array_search()) {
-//                            //
-//                        }
+                        $productNameIndex = MiscHelper::getArrayIndexByValueOrSerialNumber($data, strval($phpInput['productname']));
+                        if (!isset($productNameIndex)) {
+                            $errorText = 'PERFCODE_PRICEUPDATEBYNAMEFROMCSV_COLUMN_NOT_FOUND_ERROR_TEXT';
+                            $errorArgs = array('#PARAM_NAME#' => Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_PRODUCT_NAME_LABEL'));
+                            break;
+                        }
+                        $priceIndex = MiscHelper::getArrayIndexByValueOrSerialNumber($data, strval($phpInput['price']));
+                        if (!isset($priceIndex)) {
+                            $errorText = 'PERFCODE_PRICEUPDATEBYNAMEFROMCSV_COLUMN_NOT_FOUND_ERROR_TEXT';
+                            $errorArgs = array('#PARAM_NAME#' => Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_PRICE_LABEL'));
+                            break;
+                        }
+                        $currencyIndex = MiscHelper::getArrayIndexByValueOrSerialNumber($data, strval($phpInput['currency']));
+                        if (!isset($currencyIndex)) {
+                            $errorText = 'PERFCODE_PRICEUPDATEBYNAMEFROMCSV_COLUMN_NOT_FOUND_ERROR_TEXT';
+                            $errorArgs = array('#PARAM_NAME#' => Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_CURRENCY_LABEL'));
+                            break;
+                        }
+
+                        //
 
                         $isFirstRow = false;
-                    } else {
+                    } else { // Не первая строка
                         //
                     }
                 }
                 fclose($handle);
             }
-        } else {
+        }
+
+        if (!empty($errorText)) {
             $result['result'] = 'fail';
             $result['error'] = $errorText;
             $result['errorargs'] = $errorArgs;
