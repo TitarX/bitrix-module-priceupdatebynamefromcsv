@@ -60,8 +60,12 @@ class MiscHelper
 
         $ind = array_search($val, $arData);
         if ($ind === false) {
-            if (is_numeric($val) && isset($arData[$val])) {
-                $result = intval($val);
+            if (is_numeric($val)) {
+                $ind = intval($val);
+                $ind -= 1;
+                if (isset($arData[$ind])) {
+                    $result = $ind;
+                }
             }
         } else {
             $result = intval($ind);

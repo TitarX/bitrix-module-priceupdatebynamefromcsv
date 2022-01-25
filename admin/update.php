@@ -138,7 +138,7 @@ if ($request->isPost()) {
             $currencyIndex = -1;
             if (($handle = fopen($csvFilePath, 'r')) !== false) {
                 while (($data = fgetcsv($handle, 0, ';')) !== false && empty($errorText)) {
-                    if ($isFirstRow) { // Первая строка
+                    if ($isFirstRow) { // Первая строка, определяем индексы колонок
                         if (!mb_check_encoding($data, 'UTF-8')) {
                             $data = mb_convert_encoding($data, 'UTF-8', 'WINDOWS-1251');
                             $isDoConvertEncoding = true;
@@ -163,10 +163,8 @@ if ($request->isPost()) {
                             break;
                         }
 
-                        //
-
                         $isFirstRow = false;
-                    } else { // Не первая строка
+                    } else { // Не первая строка, обновляем цены
                         //
                     }
                 }
