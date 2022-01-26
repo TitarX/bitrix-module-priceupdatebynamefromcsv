@@ -7,6 +7,7 @@ Loader::registerAutoloadClasses(
     'perfcode.priceupdatebynamefromcsv',
     array(
         'Perfcode\PriceUpdateByNameFromCsv\Events\MainEvents' => 'lib/events/MainEvents.php',
-        'Perfcode\PriceUpdateByNameFromCsv\Helpers\MiscHelper' => 'lib/helpers/MiscHelper.php'
+        'Perfcode\PriceUpdateByNameFromCsv\Helpers\MiscHelper' => 'lib/helpers/MiscHelper.php',
+        'Perfcode\PriceUpdateByNameFromCsv\Entities\ParamsTable' => 'lib/entities/ParamsTable.php'
     )
 );
