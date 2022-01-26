@@ -50,6 +50,12 @@ function saveParams(url, params) {
         params.entryid = entryId;
     }
 
+    params.productname = document.getElementById('product-name-csv').value.trim();
+    params.price = document.getElementById('price-csv').value.trim();
+    params.currency = document.getElementById('currency-csv').value.trim();
+    params.iblock = document.getElementById('iblock-id').value.trim();
+    params.manufacturer = document.getElementById('manufacturer-property').value.trim();
+
     fetch(`${url}?action=saveparams`, {
         method: 'POST',
         headers: {
@@ -66,7 +72,7 @@ function saveParams(url, params) {
             } else {
                 const entryId = data.result;
                 document.getElementById('params-entry-id').value = entryId;
-                // updateProducts(url, params);
+                updateProducts(url, params);
             }
         }
     ).catch(
@@ -88,7 +94,11 @@ function updateProducts(url, params) {
         response => response.json()
     ).then(
         (data) => {
-            // console.log(data);
+            if (data.result === 'fail') {
+                showMessage(url, 'ERROR', data.error, data.errorargs, 'update-info');
+            } else {
+                showMessage(url, 'OK', 'PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_SUCCESS', {}, 'update-info');
+            }
         }
     ).catch(
         (error) => {
