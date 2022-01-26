@@ -13,7 +13,7 @@ $MESS['PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_PRODUCT_NAME_LABEL'] = 'Имя �
 $MESS['PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_PRICE_LABEL'] = 'Имя или номер колонки с ценой';
 $MESS['PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_CURRENCY_LABEL'] = 'Имя или номер колонки с валютой';
 $MESS['PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_IBLOCK_LABEL'] = 'ID инфоблока';
-$MESS['PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_MANUFACTURER_LABEL'] = 'Производитель (код свойства)';
+$MESS['PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_MANUFACTURER_LABEL'] = 'Производитель (XLS_BREND)';
 $MESS['PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_CSV_INFO_LABEL'] = 'Первая строка CSV-файла должна содержать имена столбцов';
 
 $MESS['PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_SUCCESS'] = 'Обновление цен завершено';

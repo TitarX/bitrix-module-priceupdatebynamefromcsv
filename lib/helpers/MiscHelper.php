@@ -62,7 +62,7 @@ class MiscHelper
         if ($ind === false) {
             if (is_numeric($val)) {
                 $ind = intval($val);
-                $ind -= 1;
+                $ind--;
                 if (isset($arData[$ind])) {
                     $result = $ind;
                 }

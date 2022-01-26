@@ -22,7 +22,7 @@ Asset::getInstance()->addJs(MiscHelper::getAssetsPath('js') . '/perfcode_priceup
 $request = Application::getInstance()->getContext()->getRequest();
 
 $rsParamsCount = ParamsTable::getCount();
-if (empty($rsParamsCount) || !is_int($rsParamsCount)) {
+if (empty($rsParamsCount) || !is_numeric($rsParamsCount)) {
     $rsParamsCount = 0;
 }
 
@@ -132,13 +132,16 @@ if ($request->isPost()) {
             $csvFilePath = "{$documentRoot}{$phpInput['filepath']}";
 
             $isDoConvertEncoding = false;
-            $isFirstRow = true;
+            $csvRow = 0;
             $productNameIndex = -1;
             $priceIndex = -1;
             $currencyIndex = -1;
+            $arCsvProductName = array();
+            $arCsvProductPrice = array();
+            $arCsvProductCurrency = array();
             if (($handle = fopen($csvFilePath, 'r')) !== false) {
                 while (($data = fgetcsv($handle, 0, ';')) !== false && empty($errorText)) {
-                    if ($isFirstRow) { // Первая строка, определяем индексы колонок
+                    if ($csvRow === 0) { // Первая строка, определяем индексы колонок
                         if (!mb_check_encoding($data, 'UTF-8')) {
                             $data = mb_convert_encoding($data, 'UTF-8', 'WINDOWS-1251');
                             $isDoConvertEncoding = true;
@@ -162,17 +165,39 @@ if ($request->isPost()) {
                             $errorArgs = array('#PARAM_NAME#' => Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_CURRENCY_LABEL'));
                             break;
                         }
+                    } else { // Не первая строка, собираем данные
+                        if ($isDoConvertEncoding) {
+                            $data = mb_convert_encoding($data, 'UTF-8', 'WINDOWS-1251');
+                        }
 
-                        $isFirstRow = false;
-                    } else { // Не первая строка, обновляем цены
-                        //
+                        $arCsvProductName[$csvRow - 1] = trim($data[$productNameIndex]);
+                        $arCsvProductPrice[$csvRow - 1] = trim($data[$priceIndex]);
+                        $arCsvProductCurrency[$csvRow - 1] = trim($data[$currencyIndex]);
                     }
+                    $csvRow++;
                 }
                 fclose($handle);
             }
         }
 
-        if (!empty($errorText)) {
+        if (empty($errorText)) {
+            $arOrder = array('SORT' => 'ASC');
+            $arFilter = array(
+                'IBLOCK_ID' => $phpInput['iblock'],
+                'PROPERTY_XLS_BREND_VALUE' => $phpInput['manufacturer'],
+                'NAME' => $arCsvProductName
+            );
+            $arGroup = false;
+            $arNav = false;
+            $arSelect = array('IBLOCK_ID', 'NAME', 'ID');
+            $dbResult = CIBlockElement::GetList($arOrder, $arFilter, $arGroup, $arNav, $arSelect);
+            while ($arrResult = $dbResult->Fetch()) {
+                $csvProductIndex = array_search($arrResult['NAME'], $arCsvProductName);
+                if (is_numeric($csvProductIndex)) {
+                    // Обновляем цену
+                }
+            }
+        } else {
             $result['result'] = 'fail';
             $result['error'] = $errorText;
             $result['errorargs'] = $errorArgs;
@@ -195,7 +220,7 @@ if ($request->isPost()) {
         }
 
         $message = Loc::getMessage($messageText, $messageArgs);
-        \CAdminMessage::ShowMessage(array('MESSAGE' => $message, 'TYPE' => $messageType));
+        CAdminMessage::ShowMessage(array('MESSAGE' => $message, 'TYPE' => $messageType));
 
         exit();
     }
