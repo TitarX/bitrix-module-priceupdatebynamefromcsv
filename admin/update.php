@@ -5,11 +5,14 @@ use Bitrix\Main\Loader;
 use Bitrix\Main\Page\Asset;
 use Bitrix\Main\Application;
 use Bitrix\Main\IO\File;
+use Bitrix\Main\ModuleManager;
 use Perfcode\PriceUpdateByNameFromCsv\Helpers\MiscHelper;
 use Perfcode\PriceUpdateByNameFromCsv\Entities\ParamsTable;
 
 Loc::loadMessages(__FILE__);
 Loader::includeModule('perfcode.priceupdatebynamefromcsv');
+
+const PRICE_TYPE_ID = 1;
 
 @set_time_limit(360);
 
@@ -127,6 +130,9 @@ if ($request->isPost()) {
             $errorArgs = array('#PARAM_NAME#' => Loc::getMessage('PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_MANUFACTURER_LABEL'));
         }
 
+        $arCsvProductName = array();
+        $arCsvProductPrice = array();
+        $arCsvProductCurrency = array();
         if (empty($errorText)) {
             $documentRoot = Application::getDocumentRoot();
             $csvFilePath = "{$documentRoot}{$phpInput['filepath']}";
@@ -136,9 +142,6 @@ if ($request->isPost()) {
             $productNameIndex = -1;
             $priceIndex = -1;
             $currencyIndex = -1;
-            $arCsvProductName = array();
-            $arCsvProductPrice = array();
-            $arCsvProductCurrency = array();
             if (($handle = fopen($csvFilePath, 'r')) !== false) {
                 while (($data = fgetcsv($handle, 0, ';')) !== false && empty($errorText)) {
                     if ($csvRow === 0) { // Первая строка, определяем индексы колонок
@@ -181,6 +184,9 @@ if ($request->isPost()) {
         }
 
         if (empty($errorText)) {
+            $successUpdateCount = 0;
+            $failUpdateCount = 0;
+
             $arOrder = array('SORT' => 'ASC');
             $arFilter = array(
                 'IBLOCK_ID' => $phpInput['iblock'],
@@ -189,14 +195,74 @@ if ($request->isPost()) {
             );
             $arGroup = false;
             $arNav = false;
-            $arSelect = array('IBLOCK_ID', 'NAME', 'ID');
+            $arSelect = array('IBLOCK_ID', 'NAME', 'ID', 'CATALOG_GROUP_' . PRICE_TYPE_ID);
             $dbResult = CIBlockElement::GetList($arOrder, $arFilter, $arGroup, $arNav, $arSelect);
             while ($arrResult = $dbResult->Fetch()) {
                 $csvProductIndex = array_search($arrResult['NAME'], $arCsvProductName);
                 if (is_numeric($csvProductIndex)) {
-                    // Обновляем цену
+                    // Проверяем версию модуля catalog, класс Bitrix\Catalog\Model\Price добавлен в версии 17.6.0
+                    $isCatalogModelPriceExists = CheckVersion(ModuleManager::getVersion('catalog'), '17.6.0');
+
+                    $arFieldPrice = array(
+                        'PRODUCT_ID' => $arrResult['ID'],
+                        'CATALOG_GROUP_ID' => PRICE_TYPE_ID,
+                        'PRICE' => $arCsvProductPrice[$csvProductIndex],
+                        'CURRENCY' => $arCsvProductCurrency[$csvProductIndex]
+                    );
+
+                    if ($isCatalogModelPriceExists) {
+                        $dbPrice = Bitrix\Catalog\Model\Price::getList(
+                            array(
+                                'filter' => array(
+                                    'PRODUCT_ID' => $arrResult['ID'],
+                                    'CATALOG_GROUP_ID' => PRICE_TYPE_ID
+                                )
+                            )
+                        );
+
+                        if ($arPrice = $dbPrice->fetch()) {
+                            $updatePriceResult = Bitrix\Catalog\Model\Price::update($arPrice['ID'], $arFieldPrice);
+                            if ($updatePriceResult->isSuccess()) {
+                                $successUpdateCount++;
+                            } else {
+                                $failUpdateCount++;
+                            }
+                        } else {
+                            $addPriceResult = Bitrix\Catalog\Model\Price::add($arFieldPrice);
+                            if ($addPriceResult->isSuccess()) {
+                                $successUpdateCount++;
+                            } else {
+                                $failUpdateCount++;
+                            }
+                        }
+                    } else {
+                        $productPrice = $arrResult['CATALOG_PRICE_' . PRICE_TYPE_ID];
+                        $productPriceId = $arrResult['CATALOG_PRICE_ID_' . PRICE_TYPE_ID];
+
+                        if (!empty($productPrice)) {
+                            $updatePriceResult = CPrice::Update($productPriceId, $arFieldPrice);
+                            if ($updatePriceResult !== false) {
+                                $successUpdateCount++;
+                            } else {
+                                $failUpdateCount++;
+                            }
+                        } else {
+                            $addPriceResult = CPrice::Add($arFieldPrice);
+                            if ($addPriceResult !== false) {
+                                $successUpdateCount++;
+                            } else {
+                                $failUpdateCount++;
+                            }
+                        }
+                    }
                 }
             }
+
+            $result['result'] = 'success';
+            $result['updatecounts'] = array(
+                '#SUCCESS_UPDATE_COUNT#' => strval($successUpdateCount),
+                '#FAIL_UPDATE_COUNT#' => strval($failUpdateCount)
+            );
         } else {
             $result['result'] = 'fail';
             $result['error'] = $errorText;
