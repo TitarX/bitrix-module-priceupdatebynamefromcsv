@@ -6,11 +6,12 @@ window.addEventListener('load', function () {
     document.getElementById('start-update-button').addEventListener('click', function () {
         BX.adjust(BX('update-info'), {html: ''});
         const requestedPage = document.getElementById('requested-page').value.trim();
-        prepareUpdate(requestedPage);
+        const waitSpinner = BX.showWait('update-info');
+        prepareUpdate(requestedPage, waitSpinner);
     });
 });
 
-function prepareUpdate(url) {
+function prepareUpdate(url, waitSpinner) {
     const filepath = document.getElementById('selected_file_path').value.trim();
 
     const params = {
@@ -29,19 +30,21 @@ function prepareUpdate(url) {
     ).then(
         (data) => {
             if (data.result && data.result === 'yes') {
-                saveParams(url, params);
+                saveParams(url, params, waitSpinner);
             } else {
+                BX.closeWait('update-info', waitSpinner);
                 showMessage(url, 'ERROR', 'PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_FILE_MISS', {}, 'update-info');
             }
         }
     ).catch(
         (error) => {
+            BX.closeWait('update-info', waitSpinner);
             // console.error(error);
         }
     );
 }
 
-function saveParams(url, params) {
+function saveParams(url, params, waitSpinner) {
     let entryId = document.getElementById('params-entry-id').value.trim();
     entryId = parseInt(entryId);
     if (Number.isNaN(entryId)) {
@@ -68,21 +71,23 @@ function saveParams(url, params) {
     ).then(
         (data) => {
             if (data.result === 'fail') {
+                BX.closeWait('update-info', waitSpinner);
                 showMessage(url, 'ERROR', 'PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_PARAMS_ERROR', {}, 'update-info');
             } else {
                 const entryId = data.result;
                 document.getElementById('params-entry-id').value = entryId;
-                updateProducts(url, params);
+                updateProducts(url, params, waitSpinner);
             }
         }
     ).catch(
         (error) => {
+            BX.closeWait('update-info', waitSpinner);
             // console.error(error);
         }
     );
 }
 
-function updateProducts(url, params) {
+function updateProducts(url, params, waitSpinner) {
     fetch(`${url}?action=update`, {
         method: 'POST',
         headers: {
@@ -94,14 +99,19 @@ function updateProducts(url, params) {
         response => response.json()
     ).then(
         (data) => {
+            BX.closeWait('update-info', waitSpinner);
             if (data.result === 'fail') {
                 showMessage(url, 'ERROR', data.error, data.errorargs, 'update-info');
-            } else {
+            } else if (data.result === 'success') {
                 showMessage(url, 'OK', 'PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_SUCCESS', {}, 'update-info');
+                showMessage(url, 'OK', 'PERFCODE_PRICEUPDATEBYNAMEFROMCSV_UPDATE_COUNTS', data.updatecounts, 'update-info');
+            } else {
+                console.log(data);
             }
         }
     ).catch(
         (error) => {
+            BX.closeWait('update-info', waitSpinner);
             // console.error(error);
         }
     );
