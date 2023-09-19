@@ -1,1 +1,1 @@
-# bitrix-module-priceupdatebynamefromcsv
+# Модуль обновления цен по имени товара из CSV
